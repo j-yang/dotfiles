@@ -10,3 +10,15 @@ font-size = 14
 
 custom-shader = shaders/cursor_warp.glsl
 custom-shader = shaders/ripple_cursor.glsl
+
+# Enable extended keys for tmux Ctrl+number window switching
+keybind = ctrl+1=text:\x1b[27;5;49~
+keybind = ctrl+2=text:\x1b[27;5;50~
+keybind = ctrl+3=text:\x1b[27;5;51~
+keybind = ctrl+4=text:\x1b[27;5;52~
+keybind = ctrl+5=text:\x1b[27;5;53~
+keybind = ctrl+6=text:\x1b[27;5;54~
+keybind = ctrl+7=text:\x1b[27;5;55~
+keybind = ctrl+8=text:\x1b[27;5;56~
+keybind = ctrl+9=text:\x1b[27;5;57~
+keybind = ctrl+0=text:\x1b[27;5;48~
