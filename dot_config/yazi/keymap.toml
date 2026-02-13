@@ -1,0 +1,116 @@
+# Yazi keymap configuration
+# Schema: https://yazi-rs.github.io/schemas/keymap.json
+"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+
+[mgr]
+keymap = [
+	{ on = "<Esc>", run = "escape", desc = "Exit visual mode, clear selection, or cancel search" },
+	{ on = "q", run = "quit", desc = "Quit" },
+	{ on = "Q", run = "quit --no-cwd-file", desc = "Quit without cwd-file" },
+	
+	# Navigation
+	{ on = "k", run = "arrow prev", desc = "Previous" },
+	{ on = "j", run = "arrow next", desc = "Next" },
+	{ on = "h", run = "leave", desc = "Go back" },
+	{ on = "l", run = "enter", desc = "Enter" },
+	
+	{ on = "<Up>", run = "arrow prev", desc = "Previous" },
+	{ on = "<Down>", run = "arrow next", desc = "Next" },
+	{ on = "<Left>", run = "leave", desc = "Go back" },
+	{ on = "<Right>", run = "enter", desc = "Enter" },
+	
+	{ on = "g g", run = "arrow top", desc = "Go to top" },
+	{ on = "G", run = "arrow bot", desc = "Go to bottom" },
+	
+	{ on = "<C-u>", run = "arrow -50%", desc = "Up half page" },
+	{ on = "<C-d>", run = "arrow 50%", desc = "Down half page" },
+	{ on = "<C-b>", run = "arrow -100%", desc = "Up one page" },
+	{ on = "<C-f>", run = "arrow 100%", desc = "Down one page" },
+	
+	{ on = "H", run = "back", desc = "Back" },
+	{ on = "L", run = "forward", desc = "Forward" },
+	
+	# Selection
+	{ on = "<Space>", run = ["toggle", "arrow 1"], desc = "Toggle" },
+	{ on = "v", run = "visual_mode", desc = "Visual mode" },
+	{ on = "V", run = "visual_mode --unset", desc = "Visual mode (unset)" },
+	{ on = "<C-a>", run = "toggle_all --state=on", desc = "Select all" },
+	{ on = "<C-r>", run = "toggle_all", desc = "Invert selection" },
+	
+	# Operations
+	{ on = "o", run = "open", desc = "Open" },
+	{ on = "O", run = "open --interactive", desc = "Open interactive" },
+	{ on = "<Enter>", run = "open", desc = "Open" },
+	{ on = "y", run = "yank", desc = "Copy" },
+	{ on = "x", run = "yank --cut", desc = "Cut" },
+	{ on = "p", run = "paste", desc = "Paste" },
+	{ on = "P", run = "paste --force", desc = "Paste (force)" },
+	{ on = "d", run = "remove", desc = "Trash" },
+	{ on = "D", run = "remove --permanently", desc = "Delete" },
+	{ on = "a", run = "create", desc = "Create" },
+	{ on = "r", run = "rename --cursor=before_ext", desc = "Rename" },
+	{ on = ".", run = "hidden toggle", desc = "Toggle hidden" },
+	
+	# Search
+	{ on = "s", run = "search --via=fd", desc = "Search files" },
+	{ on = "S", run = "search --via=rg", desc = "Search content" },
+	{ on = "/", run = "find --smart", desc = "Find" },
+	{ on = "n", run = "find_arrow", desc = "Next" },
+	{ on = "N", run = "find_arrow --previous", desc = "Previous" },
+	{ on = "z", run = "plugin fzf", desc = "FZF jump" },
+	{ on = "Z", run = "plugin zoxide", desc = "Zoxide jump" },
+	
+	# Shell
+	{ on = ";", run = "shell --interactive", desc = "Shell" },
+	{ on = ":", run = "shell --block --interactive", desc = "Shell (block)" },
+	
+	# Copy path
+	{ on = "c c", run = "copy path", desc = "Copy path" },
+	{ on = "c d", run = "copy dirname", desc = "Copy dirname" },
+	{ on = "c f", run = "copy filename", desc = "Copy filename" },
+	{ on = "c n", run = "copy name_without_ext", desc = "Copy name without ext" },
+	
+	# Filter
+	{ on = "f", run = "filter --smart", desc = "Filter" },
+	
+	# Goto
+	{ on = "g h", run = "cd ~", desc = "Home" },
+	{ on = "g c", run = "cd ~/.config", desc = "Config" },
+	{ on = "g d", run = "cd ~/Downloads", desc = "Downloads" },
+	{ on = "g D", run = "cd ~/Documents", desc = "Documents" },
+	{ on = "g p", run = "cd ~/projects", desc = "Projects" },
+	
+	# Tabs
+	{ on = "t", run = "tab_create --current", desc = "New tab" },
+	{ on = "1", run = "tab_switch 0", desc = "Tab 1" },
+	{ on = "2", run = "tab_switch 1", desc = "Tab 2" },
+	{ on = "3", run = "tab_switch 2", desc = "Tab 3" },
+	{ on = "4", run = "tab_switch 3", desc = "Tab 4" },
+	{ on = "5", run = "tab_switch 4", desc = "Tab 5" },
+	{ on = "[", run = "tab_switch -1 --relative", desc = "Previous tab" },
+	{ on = "]", run = "tab_switch 1 --relative", desc = "Next tab" },
+	
+	# Tasks
+	{ on = "w", run = "tasks:show", desc = "Tasks" },
+	
+	# Help
+	{ on = "~", run = "help", desc = "Help" },
+]
+
+[tasks]
+keymap = [
+	{ on = "<Esc>", run = "close", desc = "Close" },
+	{ on = "w", run = "close", desc = "Close" },
+	{ on = "k", run = "arrow prev", desc = "Previous" },
+	{ on = "j", run = "arrow next", desc = "Next" },
+	{ on = "<Enter>", run = "inspect", desc = "Inspect" },
+	{ on = "x", run = "cancel", desc = "Cancel" },
+]
+
+[help]
+keymap = [
+	{ on = "<Esc>", run = "escape", desc = "Close" },
+	{ on = "k", run = "arrow prev", desc = "Previous" },
+	{ on = "j", run = "arrow next", desc = "Next" },
+	{ on = "f", run = "filter", desc = "Filter" },
+]

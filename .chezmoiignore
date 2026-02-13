@@ -1,0 +1,25 @@
+# Cache files
+.config/nvim/.mypy_cache/
+.config/nvim/.ruff_cache/
+.config/nvim/*.pyc
+
+# Node modules
+.config/opencode/node_modules/
+
+# Large generated files
+.config/opencode/bun.lock
+
+# Test files
+.config/nvim/test_*.py
+.config/nvim/simple_debug_test.py
+
+# Documentation
+.config/nvim/*.md
+.config/tmux/*.md
+
+# TPM plugins (install via git clone)
+.config/tmux/plugins/
+
+# Yazi generated files
+.config/yazi/SETUP_COMPLETE.md
+.config/yazi/THEME_INSTALLED.txt

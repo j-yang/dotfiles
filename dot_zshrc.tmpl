@@ -1,0 +1,168 @@
+export http_proxy=http://127.0.0.1:7890
+export https_proxy=http://127.0.0.1:7890
+export all_proxy=socks5://127.0.0.1:7891
+
+# Unset vim-related variables to prevent conflicts with Neovim
+unset VIMINIT VIM VIMRUNTIME 2>/dev/null
+
+# If in tmux, also clear from tmux environment
+if [ -n "$TMUX" ]; then
+  tmux set-environment -gu VIMINIT 2>/dev/null
+  tmux set-environment -gu VIM 2>/dev/null
+  tmux set-environment -gu VIMRUNTIME 2>/dev/null
+fi
+
+alias cl=clear
+alias v='unset VIMINIT VIM VIMRUNTIME; command nvim'
+
+# -------------------------- XDG Base Directory Specification --------------------------
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+
+# -------------------------- Basic Zsh Configuration --------------------------
+# Enable colored output for terminal commands
+export CLICOLOR=1
+# Define color scheme for ls/eza (macOS specific)
+export LSCOLORS=Gxfxcxdxbxegedabagacad
+
+# History configuration
+HISTFILE="$XDG_STATE_HOME/zsh/history"
+HISTSIZE=1000000              # Max commands stored in memory
+SAVEHIST=1000000              # Max commands saved to file
+setopt SHARE_HISTORY          # Share history between terminal sessions
+setopt HIST_IGNORE_DUPS       # Ignore duplicate commands in history
+setopt HIST_IGNORE_SPACE      # Don't record commands starting with space
+setopt AUTO_CD                # Auto change directory when typing directory name
+
+# -------------------------- Zsh Completion & Autosuggestions --------------------------
+# Initialize zsh completion system
+autoload -Uz compinit && compinit -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
+
+# Completion enhancements
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'  # Case-insensitive completion
+zstyle ':completion:*' menu select                        # Use arrow keys to navigate completion menu
+zstyle ':completion:*' use-cache on                       # Enable completion cache for faster results
+zstyle ':completion:*' cache-path "$XDG_CACHE_HOME/zsh/cache"
+
+# Load syntax highlighting (brew installation path for macOS)
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Load command autosuggestions (brew installation path)
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# Configure autosuggestion color (light gray)
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
+# Accept autosuggestion with right arrow key or Ctrl+f
+bindkey '→' autosuggest-accept
+bindkey '^f' autosuggest-accept
+
+# -------------------------- Eza Configuration (Replacement for ls) --------------------------
+# Replace default ls with eza (enhanced ls with icons/colors)
+alias ls='eza --color=always --icons=always -g --time-style=long-iso'
+alias ll='ls -l'                  # Long format listing
+alias la='ls -la'                  # Show hidden files
+alias lla='ls -la'                # Long format + hidden files
+alias lt='ls -T'                  # Tree view of directory structure
+alias l.='ls -d .*'               # Only show hidden files
+
+# -------------------------- Zoxide Configuration (Replacement for cd) --------------------------
+# Initialize zoxide (smart directory navigation)
+eval "$(zoxide init zsh)"
+# Alias cd to z (zoxide's main command)
+alias cd='z'
+
+# Zoxide + fzf integration: interactive directory selection
+function zi() {
+  local dir
+  dir=$(zoxide query -l 2>/dev/null | fzf --height 50% --reverse --prompt 'Go to > ' --preview 'eza -l --no-permissions --icons=always --group-directories-first {}') && cd "$dir"
+}
+
+# -------------------------- FZF Enhanced Configuration --------------------------
+# Initialize fzf (if installed via brew)
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# 1. FZF file search with preview (supports code files via bat)
+function ff() {
+  local file
+  file=$(fzf --height 40% --reverse --preview 'bat --color=always --style=header,grid {} 2>/dev/null || eza --icons=always {} 2>/dev/null || cat {} 2>/dev/null' --prompt 'Find File > ') && open "$file"
+}
+
+# 2. FZF file search + open in nvim
+function vf() {
+  local file
+  file=$(fzf --height 50% --reverse --preview 'bat --color=always --style=header,grid {} 2>/dev/null' --prompt 'Open in nvim > ') && nvim "$file"
+}
+
+# 3. FZF command history search (reversed: newest first)
+function fh() {
+  print -z $(history -10000 | tail -r | fzf --height 40% --reverse --prompt 'History > ' | sed 's/^[0-9]* //')
+}
+
+# 4. FZF directory search with preview
+function fd() {
+  local dir
+  dir=$(find ${1:-.} -type d | fzf --height 40% --reverse --preview 'eza -l --no-permissions --icons=always --group-directories-first {}' --prompt 'Find Dir > ') && cd "$dir"
+}
+
+# 5. Ripgrep + fzf: search file content and open in nvim
+function rgf() {
+  local result
+  result=$(rg --line-number --color=always "" 2>/dev/null | fzf --ansi --height 50% --reverse --preview 'bat --color=always {1} --highlight-line {2} 2>/dev/null' --prompt 'Search content > ') && nvim "$(echo $result | cut -d: -f1)"
+}
+
+# FZF completion enhancements (trigger with Tab)
+# Completion for files/paths (ignore .git, follow symlinks)
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+# Completion for directories only
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
+}
+
+# -------------------------- Optional: Beautiful Prompt (Starship) --------------------------
+# Initialize starship prompt (modern, customizable shell prompt)
+eval "$(starship init zsh)"
+
+# -------------------------- FZF Theme Configuration (Gruvbox Dark) --------------------------
+export BAT_THEME='gruvbox-dark'
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --preview-window=right:50%:wrap --preview "bat --color=always --style=header,grid {} 2>/dev/null" --color=bg+:#282828,bg:#282828,spinner:#ebdbb2,hl:#fabd2f,fg:#ebdbb2,header:#fb4934,info:#83a598,pointer:#fe8019,marker:#fe8019,fg+:#ebdbb2,prompt:#b8bb26,hl+:#fabd2f'
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+
+# -----------homebrew token----------------------
+export HOMEBREW_GITHUB_API_TOKEN="{{ .homebrew_token }}"
+
+# -------------------------- Python Configuration --------------------------
+alias py=python3
+alias pip=pip3
+export PYTHON_HISTORY="$XDG_STATE_HOME/python/history"
+
+# -------------------------- Node.js Configuration --------------------------
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
+export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
+export BUN_INSTALL="$XDG_DATA_HOME/bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# -------------------------- Zsh Session Configuration --------------------------
+export ZSH_SESSIONS_DIR="$XDG_STATE_HOME/zsh/sessions"
+
+# Force clean Neovim environment (防止 OpenCode 或其他工具干扰)
+if command -v nvim &> /dev/null; then
+  alias nvim='unset VIMINIT VIM VIMRUNTIME; command nvim'
+fi
+
+# -------------------------- Yazi Configuration --------------------------
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
+
+
+# -------------------------- Mise Configuration --------------------------
+eval "$(mise activate zsh)"

@@ -1,0 +1,12 @@
+macos-titlebar-style = hidden
+macos-window-buttons = hidden
+theme = "Gruvbox Dark"
+background-opacity = 0.50
+background-blur = 85
+
+font-family = JetBrainsMono NFM SemiBold
+font-family = Sarasa Mono SC
+font-size = 14
+
+custom-shader = shaders/cursor_warp.glsl
+custom-shader = shaders/ripple_cursor.glsl
