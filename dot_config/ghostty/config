@@ -7,6 +7,7 @@ background-blur = 85
 font-family = JetBrainsMono NFM SemiBold
 font-family = Sarasa Mono SC
 font-size = 14
+font-thicken = true
 
 custom-shader = shaders/cursor_warp.glsl
 custom-shader = shaders/ripple_cursor.glsl

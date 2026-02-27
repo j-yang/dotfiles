@@ -1,0 +1,12 @@
+tap "nikitabobko/tap"
+tap "r-lib/rig"
+
+cask "nikitabobko/tap/aerospace"
+cask "ghostty"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-sarasa-gothic"
+cask "raycast"
+cask "obsidian"
+cask "dbeaver-community"
+cask "iina"
+cask "tailscale-app"

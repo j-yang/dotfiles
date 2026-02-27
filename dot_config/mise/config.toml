@@ -1,2 +1,7 @@
 [tools]
 python = "3.12"
+node = "lts"
+uv = "latest"
+
+[settings]
+experimental = true
