@@ -1,6 +1,11 @@
-export http_proxy=http://127.0.0.1:7890
-export https_proxy=http://127.0.0.1:7890
-export all_proxy=socks5://127.0.0.1:7891
+# Proxy (clash): auto-enable only if the port is reachable; toggle with proxy_on/off
+if command -v nc >/dev/null && nc -z -G1 127.0.0.1 7890 >/dev/null 2>&1; then
+  export http_proxy=http://127.0.0.1:7890
+  export https_proxy=http://127.0.0.1:7890
+  export all_proxy=socks5://127.0.0.1:7891
+fi
+proxy_on()  { export http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7891; }
+proxy_off() { unset http_proxy https_proxy all_proxy; }
 
 # Unset vim-related variables to prevent conflicts with Neovim
 unset VIMINIT VIM VIMRUNTIME 2>/dev/null
@@ -55,6 +60,9 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
 # Accept autosuggestion with right arrow key or Ctrl+f
 bindkey '→' autosuggest-accept
 bindkey '^f' autosuggest-accept
+
+# -------------------------- Atuin (shell history; replaces Ctrl-R) --------------------------
+eval "$(atuin init zsh)"
 
 # -------------------------- Eza Configuration (Replacement for ls) --------------------------
 # Replace default ls with eza (enhanced ls with icons/colors)
@@ -132,8 +140,27 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 
-# -----------homebrew token----------------------
-export HOMEBREW_GITHUB_API_TOKEN="{{ .homebrew_token }}"
+# -------------------------- Secrets (age-encrypted, decrypted in-memory) --------------------------
+# secrets.age 是密文，随 chezmoi 同步；age 私钥 ~/.config/chezmoi/age-key.txt 仅本机。
+# 管理：secrets edit / secrets show
+if [ -f "$HOME/.config/secrets/secrets.age" ] && [ -f "$HOME/.config/chezmoi/age-key.txt" ]; then
+  eval "$(age -d -i "$HOME/.config/chezmoi/age-key.txt" "$HOME/.config/secrets/secrets.age" 2>/dev/null)"
+fi
+
+secrets() {
+  local key="$HOME/.config/chezmoi/age-key.txt" src="$HOME/.config/secrets/secrets.age"
+  case "$1" in
+    edit)
+      local tmp; tmp="$(mktemp -t secrets.XXXXXX)" || return 1
+      [ -f "$src" ] && age -d -i "$key" "$src" >"$tmp" 2>/dev/null
+      "${EDITOR:-nvim}" "$tmp" || { rm -f "$tmp"; return 1; }
+      age -r "$(age-keygen -y "$key")" -o "$src" "$tmp" && chmod 600 "$src"
+      rm -f "$tmp"; echo "encrypted -> $src"
+      ;;
+    show) age -d -i "$key" "$src" 2>/dev/null ;;
+    *) echo "usage: secrets edit|show" ;;
+  esac
+}
 
 # -------------------------- Python Configuration --------------------------
 alias py=python3
@@ -168,3 +195,6 @@ function y() {
 
 # -------------------------- Mise Configuration --------------------------
 eval "$(mise activate zsh)"
+
+# -------------------------- Direnv (per-directory env) --------------------------
+eval "$(direnv hook zsh)"

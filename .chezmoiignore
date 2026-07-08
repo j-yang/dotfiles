@@ -15,11 +15,10 @@
 
 # Documentation
 .config/nvim/*.md
-.config/tmux/*.md
-
-# TPM plugins (install via git clone)
-.config/tmux/plugins/
 
 # Yazi generated files
 .config/yazi/SETUP_COMPLETE.md
 .config/yazi/THEME_INSTALLED.txt
+
+# age private key (local per machine; never commit; distribute out-of-band)
+.config/chezmoi/age-key.txt

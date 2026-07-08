@@ -1,18 +1,18 @@
 macos-titlebar-style = hidden
 macos-window-buttons = hidden
-theme = "Gruvbox Dark"
-background-opacity = 0.50
+theme = "TokyoNight Storm"
+background-opacity = 0.90
 background-blur = 85
 
-font-family = JetBrainsMono NFM SemiBold
+font-family = Maple Mono NF CN
 font-family = Sarasa Mono SC
 font-size = 14
-font-thicken = true
+font-features = +calt +liga
 
 custom-shader = shaders/cursor_warp.glsl
 custom-shader = shaders/ripple_cursor.glsl
 
-# Enable extended keys for tmux Ctrl+number window switching
+# Enable extended keys for zellij Ctrl+number tab switching
 keybind = ctrl+1=text:\x1b[27;5;49~
 keybind = ctrl+2=text:\x1b[27;5;50~
 keybind = ctrl+3=text:\x1b[27;5;51~

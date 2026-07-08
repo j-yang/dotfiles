@@ -130,18 +130,6 @@ setup_mise() {
     echo "mise tools installed."
 }
 
-setup_tmux_plugins() {
-    echo "Installing TPM (Tmux Plugin Manager)..."
-    
-    TPM_DIR="$HOME/.config/tmux/plugins/tpm"
-    if [ ! -d "$TPM_DIR" ]; then
-        git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
-        echo "TPM installed. Run 'Prefix + I' in tmux to install plugins."
-    else
-        echo "TPM already installed."
-    fi
-}
-
 setup_neovim() {
     echo "Installing Neovim plugins..."
     nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
@@ -156,9 +144,8 @@ print_post_install() {
     echo ""
     echo "Post-install steps:"
     echo "  1. Restart your shell or run: source ~/.zshrc"
-    echo "  2. In tmux, press Prefix + I to install plugins"
-    echo "  3. Open nvim to finish plugin installation"
-    echo "  4. Configure git: git config --global user.name/email"
+    echo "  2. Open nvim to finish plugin installation"
+    echo "  3. Configure git: git config --global user.name/email"
     echo ""
 }
 
@@ -188,7 +175,6 @@ main() {
     esac
     
     setup_mise
-    setup_tmux_plugins
     setup_neovim
     print_post_install
 }

@@ -23,13 +23,6 @@ return {
         desc = "Run Test File",
       },
       {
-        "<leader>tn",
-        function()
-          require("neotest").run.run()
-        end,
-        desc = "Run Nearest Test",
-      },
-      {
         "<leader>tl",
         function()
           require("neotest").run.run_last()
