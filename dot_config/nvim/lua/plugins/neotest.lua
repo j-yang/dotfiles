@@ -69,7 +69,6 @@ return {
       adapters = {
         ["neotest-python"] = {
           dap = { justMyCode = false },
-          args = { "--log-level", "DEBUG" },
           runner = "pytest",
           python = function()
             local venv = os.getenv("VIRTUAL_ENV")

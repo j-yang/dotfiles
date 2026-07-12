@@ -5,7 +5,6 @@ return {
       ensure_installed = {
         "basedpyright",
         "debugpy",
-        "ruff",
         "stylua",
         "shellcheck",
         "shfmt",

@@ -13,7 +13,7 @@ return {
       })
       term:toggle()
     end, desc = "Run Python file" },
-    { "<leader>s", mode = "v", desc = "Send selection to terminal" },
+    { "<leader>S", mode = "v", desc = "Send selection to terminal" },
   },
   opts = {
     shade_terminals = false,
@@ -31,6 +31,6 @@ return {
       vim.cmd("ToggleTerm")
       vim.fn.chansend(vim.b.terminal_job_id, text .. "\n")
     end
-    vim.keymap.set("v", "<leader>s", send_selection, { buffer = false, desc = "Send selection to terminal" })
+    vim.keymap.set("v", "<leader>S", send_selection, { buffer = false, desc = "Send selection to terminal" })
   end,
 }
