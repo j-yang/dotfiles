@@ -67,21 +67,24 @@ experimental = true
 - 主题 tokyonight-storm；格式化 ruff（conform.nvim）；LSP basedpyright + rust_analyzer；DAP 走 Mason debugpy；调试/测试 neotest。
 - **不要**往 `~/.config/nvim` 放 `*.md` / `test_*.py` / cache —— 这些被 `.chezmoiignore` 排除，且会污染编辑器配置目录。
 
-## 密钥与 Token（age 加密，跨设备同步）
+## 密钥与 Token（age 多 recipient，跨设备同步）
 
-所有 secret（GitHub PAT / npm / crates.io 等）加密存进 git 仓库，随 chezmoi 同步到每台机器；私钥仅本机持有、**不**提交。
+所有 secret（GitHub PAT / npm / crates.io 等）加密存进 git 仓库，随 chezmoi 同步。用 age 的**多 recipient**：`secrets.age` 加密给 `recipients.txt` 里**所有公钥**，每台设备持有**自己的私钥**——**私钥从不在设备间拷贝**。
 
 | 文件 | 作用 | 是否提交 |
 |---|---|---|
 | `~/.config/secrets/secrets.age` | 密文 secrets（chezmoi 纳管，`private_` → 0600） | ✅ 加密后提交 |
-| `~/.config/chezmoi/age-key.txt` | age 私钥（本机独有） | ❌ 已在 `.chezmoiignore` |
+| `~/.config/secrets/recipients.txt` | 所有设备的 age 公钥列表（公钥不敏感） | ✅ 提交 |
+| `~/.config/chezmoi/age-key.txt` | **本机** age 私钥（每台设备各自生成） | ❌ 已在 `.chezmoiignore` |
 
 zshrc 启动时 `age -d` 在内存解密并 `eval`，**不**落明文文件。
 
 日常管理（zsh 函数）：
 ```bash
-secrets edit   # 解密到临时文件 → 编辑 → 重新加密
-secrets show   # 解密到 stdout 查看
+secrets edit                 # 解密到临时文件 → 编辑 → 重新加密给所有 recipient
+secrets show                 # 解密到 stdout 查看
+secrets pub                  # 打印本机公钥（给新设备授权时用）
+secrets add-recipient <pub>  # 加一台设备的公钥 + 重加密（在已授权设备上跑）
 ```
 文件格式（一行一个 export）：
 ```
@@ -94,10 +97,23 @@ export CARGO_REGISTRY_TOKEN="cry_xxx"
 - **npm**：`~/.config/npm/npmrc` 里写 `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`，zsh 启动时由 age 注入 `NPM_TOKEN`。
 - **crates.io**：`~/.cargo/config.toml` 设 `global-credential-providers = ["cargo:macos-keychain","cargo:token"]`；或把 `CARGO_REGISTRY_TOKEN` 放进 secrets.age。
 
-### 新增一台机器
-1. `chezmoi init --apply j-yang` —— 拉到密文 `secrets.age`。
-2. 把原机器的 `~/.config/chezmoi/age-key.txt` **安全拷到新机器同路径**（AirDrop / U 盘，勿走公网明文）。
-3. 重开 shell，`echo $HOMEBREW_GITHUB_API_TOKEN` 应有值。
+### 新增一台机器（免拷私钥）
+```bash
+# 新机器：
+chezmoi init --apply j-yang                       # 拉到密文 secrets.age + recipients.txt（还解不开）
+age-keygen -o ~/.config/chezmoi/age-key.txt       # 生成这台自己的私钥
+secrets pub                                        # 打印本机公钥 age1...，发给已授权机器
+
+# 已授权机器（任何一台）：
+secrets add-recipient <新机器公钥>                 # 加公钥 + 重加密
+chezmoi re-add ~/.config/secrets
+( cd ~/.local/share/chezmoi && git add -A && git commit -m "secrets: add recipient" && git push )
+
+# 新机器：
+chezmoi update                                     # 拉到重加密后的 secrets.age
+exec zsh                                           # 现在能解密，token 已注入
+```
+私钥从不离开本机；机器丢了，重加密时从 `recipients.txt` 删掉它的公钥即可吊销。
 
 ## 日常命令
 
@@ -132,6 +148,6 @@ python = "3.12"
 # 2. 一键引导（装 chezmoi + brew 包 + mise 工具 + nvim 插件）
 sh -c "$(curl -fsLS https://raw.githubusercontent.com/j-yang/dotfiles/main/install.sh)"
 # 或已有 chezmoi：chezmoi init --apply j-yang
-# 3. 把 age 私钥拷到 ~/.config/chezmoi/age-key.txt（从另一台机器安全复制）
+# 3. 配置 age 多 recipient（见上"密钥与 Token"）：新机器 age-keygen + 已授权机器 add-recipient
 # 4. atuin 历史（可选同步）：atuin import auto && atuin sync
 ```

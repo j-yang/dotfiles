@@ -140,25 +140,37 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 
-# -------------------------- Secrets (age-encrypted, decrypted in-memory) --------------------------
-# secrets.age 是密文，随 chezmoi 同步；age 私钥 ~/.config/chezmoi/age-key.txt 仅本机。
-# 管理：secrets edit / secrets show
+# -------------------------- Secrets (age multi-recipient, decrypted in-memory) --------------------------
+# secrets.age 加密给 recipients.txt 里所有公钥；每台设备持有自己的 age 私钥（不拷贝）。
+# 管理：secrets edit | show | pub | add-recipient <age1-pubkey>
 if [ -f "$HOME/.config/secrets/secrets.age" ] && [ -f "$HOME/.config/chezmoi/age-key.txt" ]; then
   eval "$(age -d -i "$HOME/.config/chezmoi/age-key.txt" "$HOME/.config/secrets/secrets.age" 2>/dev/null)"
 fi
 
 secrets() {
-  local key="$HOME/.config/chezmoi/age-key.txt" src="$HOME/.config/secrets/secrets.age"
+  local key="$HOME/.config/chezmoi/age-key.txt"
+  local src="$HOME/.config/secrets/secrets.age"
+  local rec="$HOME/.config/secrets/recipients.txt"
   case "$1" in
     edit)
       local tmp; tmp="$(mktemp -t secrets.XXXXXX)" || return 1
       [ -f "$src" ] && age -d -i "$key" "$src" >"$tmp" 2>/dev/null
       "${EDITOR:-nvim}" "$tmp" || { rm -f "$tmp"; return 1; }
-      age -r "$(age-keygen -y "$key")" -o "$src" "$tmp" && chmod 600 "$src"
-      rm -f "$tmp"; echo "encrypted -> $src"
+      age -R "$rec" -o "$src" "$tmp" && chmod 600 "$src"
+      rm -f "$tmp"; echo "encrypted -> $src (to all recipients)"
       ;;
     show) age -d -i "$key" "$src" 2>/dev/null ;;
-    *) echo "usage: secrets edit|show" ;;
+    pub) age-keygen -y "$key" ;;
+    add-recipient)
+      [ -z "$2" ] && { echo "usage: secrets add-recipient <age1-pubkey>"; return 1; }
+      echo "$2" >> "$rec"
+      local tmp; tmp="$(mktemp -t secrets.XXXXXX)"
+      age -d -i "$key" "$src" >"$tmp" 2>/dev/null
+      age -R "$rec" -o "$src" "$tmp" && chmod 600 "$src"
+      rm -f "$tmp"
+      echo "added recipient & re-encrypted. Sync: chezmoi re-add ~/.config/secrets && (cd ~/.local/share/chezmoi && git add -A && git commit -m 'secrets: add recipient' && git push)"
+      ;;
+    *) echo "usage: secrets edit|show|pub|add-recipient <pubkey>" ;;
   esac
 }
 
