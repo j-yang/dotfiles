@@ -1,7 +1,7 @@
 macos-titlebar-style = hidden
 macos-window-buttons = hidden
 theme = "TokyoNight Storm"
-background-opacity = 0.78
+background-opacity = 0.65
 background-blur = 85
 
 font-family = Maple Mono NF CN
